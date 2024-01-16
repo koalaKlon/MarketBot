@@ -1,15 +1,16 @@
 import asyncio
 import logging
 import sys
-
+import os
 from aiogram import Bot, Dispatcher
-
-from config import TOKEN_API
+from dotenv import load_dotenv
 from handlers import router
+
+load_dotenv()
 
 
 async def main() -> None:
-    bot = Bot(TOKEN_API)
+    bot = Bot(os.getenv("TOKEN_API"))
     dp = Dispatcher()
     dp.include_router(router)
     await bot.delete_webhook(drop_pending_updates=True)

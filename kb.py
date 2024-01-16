@@ -1,12 +1,16 @@
-from typing import Union
+import os
+import gspread
 
+from typing import Union
+from dotenv import load_dotenv
 from aiogram import types
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from config import sh
+load_dotenv()
 
-worksheet = sh.get_worksheet(0)
+gc = gspread.service_account(filename=os.getenv("FILENAME"))
+worksheet = gc.open_by_key(os.getenv("GSHEET_KEY")).get_worksheet(0)
 
 columns_list = worksheet.col_values(9)[1:]
 unique_columns_list = list(set(columns_list))
