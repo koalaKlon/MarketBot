@@ -1,5 +1,6 @@
 import os
 import gspread
+import hashlib
 
 from typing import Union
 from dotenv import load_dotenv
@@ -37,7 +38,14 @@ async def button_shop(query: Union[Message, types.CallbackQuery]):
     try:
         builder = InlineKeyboardBuilder()
         for shop in unique_shops:
-            builder.button(text=f"{shop}", callback_data=f"{shop}")
+            callback_data = f"{shop}"
+            if len(callback_data.encode('utf-8')) <= 64:
+                builder.button(text=f"{shop}", callback_data=callback_data)
+            else:
+                short_shop_name = shop[:10]
+                unique_id = generate_unique_id(shop)
+                callback_data = f"{short_shop_name}_{unique_id}"
+                builder.button(text=f"{shop}", callback_data=callback_data)
         builder.adjust(3)
         builder.button(text="В меню", callback_data="menu")
         await query.message.edit_text("Выбирайте🥰", reply_markup=builder.as_markup())
@@ -48,7 +56,14 @@ async def button_shop(query: Union[Message, types.CallbackQuery]):
 async def handle_shop(query: types.CallbackQuery, shop_name):
     builder = InlineKeyboardBuilder()
     for discount in shop_to_discounts[shop_name]:
-        builder.button(text=f"{discount}", callback_data=f"{discount}")
+        callback_data = f"{discount}"
+        if len(callback_data.encode('utf-8')) <= 64:
+            builder.button(text=f"{discount}", callback_data=callback_data)
+        else:
+            short_discount_name = discount[:10]
+            unique_id = generate_unique_id(discount)
+            callback_data = f"{short_discount_name}_{unique_id}"
+            builder.button(text=f"{discount}", callback_data=callback_data)
     builder.button(text="В меню", callback_data="menu")
     builder.adjust(1)
     try:
@@ -84,6 +99,10 @@ async def handle_discount(query: types.CallbackQuery, shop_name, discount):
     await query.message.answer(f"Чтобы воспользоваться акцией необходимо: {conditions}")
     await query.message.answer(f"Название: {shop_name}\nСкидка: {discount}\nСсылка: {link}\nДействует до: {valid_until}\nРегион: {region}\nУсловия: {conditions}\nПромокод: {promo}")
     await query.message.answer("Куда отправимся за скидками дальше?", reply_markup=builder.as_markup())
+
+
+def generate_unique_id(shop):
+    return hashlib.md5(shop.encode()).hexdigest()[:8]
 
 
 category_button = KeyboardButton(text='Категории')
