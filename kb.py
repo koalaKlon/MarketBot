@@ -136,3 +136,5 @@ for shop, discount in zip(worksheet.col_values(1)[1:], worksheet.col_values(4)[1
 
 
 
+
+
