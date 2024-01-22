@@ -8,10 +8,11 @@ from handlers import router
 
 load_dotenv()
 
+dp = Dispatcher()
+
 
 async def main() -> None:
     bot = Bot(os.getenv("TOKEN_API"))
-    dp = Dispatcher()
     dp.include_router(router)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
